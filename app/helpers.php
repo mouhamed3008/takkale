@@ -93,7 +93,7 @@ if (! function_exists('action_log')) {
             $data = array_merge($defaultData, $data);
             Log::channel($channel)->{$method}($message, $data);
         } catch (\Throwable $th) {
-            Log::warning("Erreur lors de l'écriture du fichier de log");
+            Log::warning(__('error_writing_log_file'));
         }
     }
 }

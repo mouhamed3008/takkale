@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Cart\CartController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\POS\POSController;
 use App\Http\Controllers\Product\ProductController;
@@ -12,13 +13,12 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('products', ProductController::class);
     Route::resource('users', \App\Http\Controllers\User\UserController::class);
     Route::resource('orders', OrderController::class);
+    Route::patch('orders/{id}/change-status', [OrderController::class, 'changeStatus'])->name('orders.change-status');
 
 
 

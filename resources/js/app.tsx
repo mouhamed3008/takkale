@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 import { route as routeFn } from 'ziggy-js';
 import { initializeTheme } from './hooks/use-appearance';
+import { ConfirmProvider } from './hooks/use-confirm';
 
 declare global {
     const route: typeof routeFn;
@@ -20,10 +21,10 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(
-            <>
+            <ConfirmProvider>
                 <App {...props} />
                 <Toaster />
-            </>,
+            </ConfirmProvider>,
         );
     },
     progress: {

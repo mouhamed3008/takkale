@@ -1,10 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useConfirm } from '@/hooks/use-confirm';
 import orders from '@/routes/orders';
 import { Order } from '@/types';
 import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Package, Pencil, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const getStatusBadge = (status: string) => {
     if (status === 'new') return 'bg-amber-50 text-amber-700 border border-amber-100';
@@ -13,6 +16,139 @@ const getStatusBadge = (status: string) => {
 
     return 'bg-slate-50 text-slate-500 border border-slate-100';
 };
+
+function OrderActions({ order }: { order: Order }) {
+    const confirm = useConfirm();
+
+    const handleRecover = async () => {
+        await confirm.confirm({
+            title: 'Récupérer cette commande ?',
+            description: 'La commande sera marquée comme terminée et ne pourra plus être modifiée.',
+            variant: 'default',
+            cancelText: 'Annuler',
+            confirmText: 'Récupérer',
+            onConfirm: async () => {
+                router.patch(
+                    orders.changeStatus.url(order.id),
+                    {},
+                    {
+                        onSuccess: () => {
+                            toast.success('Commande récupérée avec succès');
+                            // Recharger la page pour mettre à jour les données
+                            router.reload();
+                        },
+                        onError: () => {
+                            toast.error('Erreur lors de la récupération');
+                        },
+                    },
+                );
+            },
+        });
+    };
+
+    // Ne pas afficher les boutons si la commande est déjà terminée
+    if (order.status === 'finished') {
+        return (
+            <div className="flex items-center gap-2">
+                <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => router.visit(orders.show.url(order.id))}
+                                className="rounded-full bg-green-50 p-2 text-2xl text-green-500 transition"
+                                aria-label="Voir la commande"
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Voir la commande</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.visit(orders.show.url(order.id))}
+                            className="rounded-full bg-green-50 p-2 text-2xl text-green-500 transition"
+                            aria-label="Voir la commande"
+                        >
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Voir la commande</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.visit(orders.edit.url(order.id))}
+                            className="rounded-full bg-blue-50 p-2 text-blue-500 transition"
+                            aria-label="Modifier la commande"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Modifier la commande</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRecover}
+                            className="rounded-full bg-purple-50 p-2 text-purple-500 transition"
+                            aria-label="Récupérer la commande"
+                        >
+                            <Package className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Récupérer la commande</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {}}
+                            className="rounded-full bg-rose-50 text-rose-600"
+                            aria-label="Supprimer la commande"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Supprimer la commande</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
+    );
+}
 
 export const columns: ColumnDef<Order>[] = [
     {
@@ -87,46 +223,7 @@ export const columns: ColumnDef<Order>[] = [
     {
         id: 'actions',
         header: 'Actions',
-        cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => router.visit(orders.show.url(row.original.id))}
-                    className="rounded-full bg-green-50 p-2 text-green-500 transition"
-                >
-                    <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => router.visit(orders.edit.url(row.original.id))}
-                    className="rounded-full bg-blue-50 p-2 text-blue-500 transition"
-                >
-                    <Pencil className="h-4 w-4" />
-                </Button>
-                {/* Supprimer */}
-                <Button variant="ghost" size="icon" onClick={() => () => {}} className="rounded-full bg-rose-50 text-rose-600">
-                    <Trash2 className="h-4 w-4" />
-                </Button>
-                {/* Dialog */}
-                {/* <AlertDialog open={open} onOpenChange={setOpen}>
-                    <AlertDialogContent className="rounded-2xl">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Supprimer la commande ?</AlertDialogTitle>
-                            <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
-                        </AlertDialogHeader>
-
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete} disabled={loading} className="bg-rose-600 hover:bg-rose-700">
-                                {loading ? 'Suppression...' : 'Supprimer'}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog> */}
-            </div>
-        ),
+        cell: ({ row }) => <OrderActions order={row.original} />,
         enableSorting: false,
         enableHiding: false,
     },

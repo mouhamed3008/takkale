@@ -2,12 +2,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useConfirm } from '@/hooks/use-confirm';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency } from '@/lib/utils';
 import orders from '@/routes/orders';
 import { BreadcrumbItem, Order } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Calendar, CheckCircle, CreditCard, MapPin, Package, Phone, User, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Commandes', href: orders.index.url() },
@@ -27,6 +29,32 @@ const getStatusBadge = (status: string) => {
 
 export default function Show({ order }: OrderShowProps) {
     const statusInfo = getStatusBadge(order.status ?? '');
+    const confirm = useConfirm();
+
+    const handleRecover = async () => {
+        await confirm.confirm({
+            title: 'Récupérer cette commande ?',
+            description: 'La commande sera marquée comme terminée et ne pourra plus être modifiée.',
+            variant: 'default',
+            cancelText: 'Annuler',
+            confirmText: 'Récupérer',
+            onConfirm: async () => {
+                router.patch(
+                    orders.changeStatus.url(order.id),
+                    {},
+                    {
+                        onSuccess: () => {
+                            toast.success('Commande récupérée avec succès');
+                            router.reload();
+                        },
+                        onError: () => {
+                            toast.error('Erreur lors de la récupération');
+                        },
+                    },
+                );
+            },
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -166,33 +194,28 @@ export default function Show({ order }: OrderShowProps) {
                             </Card>
                         </div>
 
-                        <div className="mt-6 flex justify-end gap-3">
-                            {/* <Button variant="outline" onClick={() => router.get(orders.edit.url(order.id))} className="rounded-2xl">
+                        {order && order.status != 'finished' && (
+                            <div className="mt-6 flex justify-end gap-3">
+                                {/* <Button variant="outline" onClick={() => router.get(orders.edit.url(order.id))} className="rounded-2xl">
                                 Modifier
                             </Button> */}
-                            <Button
-                                variant="destructive"
-                                onClick={() => {
-                                    if (confirm('Voulez-vous vraiment supprimer cette commande ?')) {
-                                        router.delete(orders.destroy.url(order.id));
-                                    }
-                                }}
-                                className="rounded-2xl"
-                            >
-                                Supprimer
-                            </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                        if (confirm('Voulez-vous vraiment supprimer cette commande ?')) {
+                                            router.delete(orders.destroy.url(order.id));
+                                        }
+                                    }}
+                                    className="rounded-2xl"
+                                >
+                                    Supprimer
+                                </Button>
 
-                            <Button
-                                onClick={() => {
-                                    if (confirm('Voulez-vous vraiment supprimer cette commande ?')) {
-                                        router.delete(orders.destroy.url(order.id));
-                                    }
-                                }}
-                                className="rounded-2xl"
-                            >
-                                Recuperer
-                            </Button>
-                        </div>
+                                <Button onClick={handleRecover} className="rounded-2xl">
+                                    Recuperer
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

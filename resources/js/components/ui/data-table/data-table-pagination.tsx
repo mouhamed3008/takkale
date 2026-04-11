@@ -19,30 +19,32 @@ export default function DataTablePagination({ data }: DataTablePaginationProps) 
   const links = data.links;
 
   const getButtonContent = (label: string) => {
-    if (label.includes('&laquo;') || label.toLowerCase().includes('previous')) {
-      return (
-        <>
-          <ChevronLeft className="h-4 w-4" />
-          <span>Prec.</span>
-        </>
-      );
-    }
+  const clean = label.toLowerCase();
 
-    if (label.includes('&raquo;') || label.toLowerCase().includes('next')) {
-      return (
-        <>
-          <span>Suiv.</span>
-          <ChevronRight className="h-4 w-4" />
-        </>
-      );
-    }
+  if (clean.includes('previous')) {
+    return (
+      <>
+        <ChevronLeft className="h-4 w-4" />
+        <span>Prec.</span>
+      </>
+    );
+  }
 
-    if (label === '...') {
-      return <MoreHorizontal className="h-4 w-4" />;
-    }
+  if (clean.includes('next')) {
+    return (
+      <>
+        <span>Suiv.</span>
+        <ChevronRight className="h-4 w-4" />
+      </>
+    );
+  }
 
-    return label;
-  };
+  if (label === '...') {
+    return <MoreHorizontal className="h-4 w-4" />;
+  }
+
+  return label;
+};
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
@@ -55,7 +57,7 @@ export default function DataTablePagination({ data }: DataTablePaginationProps) 
 
           return (
             <Button
-              key={link.url || i}
+              key={`${link.url ?? 'no-url'}-${i}`}
               variant="outline"
               disabled={!link.url || isEllipsis}
               className={`

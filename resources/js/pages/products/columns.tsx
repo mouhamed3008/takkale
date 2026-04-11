@@ -1,11 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import products from '@/routes/products';
 import { Product } from '@/types';
-import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ProductActions } from './components/product-actions';
 
 const getProductStatusStyles = (active: boolean) => {
     if (active) {
@@ -87,33 +84,6 @@ export const columns: ColumnDef<Product>[] = [
     {
         id: 'actions',
         header: 'Action',
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-500 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700">
-                    <MoreHorizontal className="h-4 w-4" />
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-44 rounded-2xl border-slate-200 p-2">
-                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl">
-                        <a href={products.edit.url(row.original.id)} className="flex items-center gap-2">
-                            <Pencil className="h-4 w-4" />
-                            Modifier
-                        </a>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                        className="cursor-pointer rounded-xl text-rose-600 focus:text-rose-600"
-                        onClick={() => {
-                            if (confirm('Voulez-vous vraiment supprimer ce produit ? Cette action est irréversible.')) {
-                                router.delete(products.destroy.url(row.original.id));
-                            }
-                        }}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                        Supprimer
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
+        cell: ({ row }) => <ProductActions product={row.original} />,
     },
 ];

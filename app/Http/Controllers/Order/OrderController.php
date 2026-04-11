@@ -107,6 +107,13 @@ class OrderController extends Controller
     {
         $order = $this->orderRepository->findFirst('id', $id);
 
+        // Ensure the order belongs to the current user's company
+        if ($order->company_id !== current_user()->company_id) {
+            abort(403, 'Unauthorized');
+        }
+
         $this->orderRepository->update(['status' => OrderStatus::TERMINATED], $id);
+
+        $this->show($id);
     }
 }
