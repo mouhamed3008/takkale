@@ -27,11 +27,7 @@ class CustomerController extends Controller
     }
 
 
-    // public function create()
-    // {
-    //     $this->authorize('create_product');
-    //     return Inertia::render('products/create', []);
-    // }
+
 
     public function store(CustomerRequest $request)
     {
