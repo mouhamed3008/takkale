@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Cart\CartController;
+use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\POS\POSController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,11 +18,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('products', ProductController::class);
-    Route::resource('users', \App\Http\Controllers\User\UserController::class);
+    Route::resource('users', UserController::class);
     Route::resource('orders', OrderController::class);
     Route::patch('orders/{id}/change-status', [OrderController::class, 'changeStatus'])->name('orders.change-status');
-
-
+    Route::resource('customers', CustomerController::class);
 
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -29,5 +30,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/update-price', [CartController::class, 'updatePrice'])->name('cart.update-price');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

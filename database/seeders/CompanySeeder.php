@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class CompanySeeder extends Seeder
 {
@@ -17,11 +16,13 @@ class CompanySeeder extends Seeder
         //
         $admin = User::first();
 
-        Company::create([
-            'name'     => 'Tech Solutions',
-            'address'  => '123 Dakar, Senegal',
-            'user_id'  => $admin->id,
-            'logo'     => 'company_logo.png',
+        $company = Company::create([
+            'name' => 'Tech Solutions',
+            'address' => '123 Dakar, Senegal',
+            'user_id' => $admin->id,
+            'logo' => 'company_logo.png',
         ]);
+
+        $admin->update(['company_id' => $company->id]);
     }
 }
