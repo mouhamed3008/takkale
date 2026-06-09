@@ -23,10 +23,12 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('orders/{id}/change-status', [OrderController::class, 'changeStatus'])->name('orders.change-status');
     Route::resource('customers', CustomerController::class);
 
+
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    
     Route::post('/cart/update-price', [CartController::class, 'updatePrice'])->name('cart.update-price');
 });
 
