@@ -8,6 +8,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BarChart2, CreditCard, LayoutGrid, Moon, Package, ShoppingBag, Star, Sun, Users, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
+import customers from '@/routes/customers';
 
 const mainNavItems: NavItem[] = [
     {
@@ -32,7 +33,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Clients',
-        href: '/clients',
+        href: customers.index.url(),
         icon: Users,
     },
     {
