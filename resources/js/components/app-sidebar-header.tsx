@@ -1,10 +1,11 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useInitials } from '@/hooks/use-initials';
 import { type BreadcrumbItem as BreadcrumbItemType, type SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
-import { Bell, Search } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Bell, LogOut, Search, UserRound } from 'lucide-react';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     const { auth } = usePage<SharedData>().props;
@@ -30,16 +31,48 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     <Bell className="size-4" />
                 </button>
 
-                <div className="flex items-center gap-2.5">
-                    <Avatar className="size-8 rounded-full">
-                        <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-                        <AvatarFallback className="rounded-full text-xs">{getInitials(auth.user.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="hidden flex-col sm:flex">
-                        <span className="text-foreground text-sm leading-none font-semibold">{auth.user.name}</span>
-                        <span className="text-muted-foreground mt-0.5 text-xs leading-none">{auth.user.email}</span>
-                    </div>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2.5 rounded-lg p-1 transition-colors hover:bg-accent">
+                            <Avatar className="size-8 rounded-full">
+                                <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                <AvatarFallback className="rounded-full text-xs">{getInitials(auth.user.name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="hidden flex-col text-left sm:flex">
+                                <span className="text-foreground text-sm leading-none font-semibold">{auth.user.name}</span>
+                                <span className="text-muted-foreground mt-0.5 text-xs leading-none">{auth.user.email}</span>
+                            </div>
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel className="p-0 font-normal">
+                            <div className="flex items-center gap-2 px-2 py-2">
+                                <Avatar className="size-8 rounded-full">
+                                    <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                    <AvatarFallback className="rounded-full text-xs">{getInitials(auth.user.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-semibold">{auth.user.name}</span>
+                                    <span className="text-muted-foreground text-xs">{auth.user.email}</span>
+                                </div>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href={route('profile.edit')} className="flex cursor-pointer items-center gap-2">
+                                <UserRound className="size-4" />
+                                Voir le profil
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link method="post" href={route('logout')} as="button" className="flex w-full cursor-pointer items-center gap-2 text-red-600 focus:text-red-600">
+                                <LogOut className="size-4" />
+                                Se déconnecter
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
     );

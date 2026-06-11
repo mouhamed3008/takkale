@@ -6,6 +6,7 @@ use App\Constants\OrderStatus;
 use App\Http\Controllers\Cart\CartController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderRequest;
+use App\Http\Requests\RecoverOrderRequest;
 use App\Models\Bank;
 use App\Models\PaymentMethod;
 use App\Repositories\OrderRepository;
@@ -34,11 +35,11 @@ class OrderController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', '%' . $search . '%')
+                $q->where('code', 'like', '%'.$search.'%')
                     ->orWhereHas('customer', function ($customerQuery) use ($search) {
-                        $customerQuery->where('fullname', 'like', '%' . $search . '%');
+                        $customerQuery->where('fullname', 'like', '%'.$search.'%');
                     })
-                    ->orWhere('status', 'like', '%' . $search . '%');
+                    ->orWhere('status', 'like', '%'.$search.'%');
             });
         }
 
@@ -46,9 +47,6 @@ class OrderController extends Controller
 
         return inertia('orders/index', compact('orders'));
     }
-
-
-
 
     public function store(OrderRequest $request, CartController $cart)
     {
@@ -62,7 +60,7 @@ class OrderController extends Controller
                     [
                         'amount' => $amount,
                         'payment_status' => $amount > $validated['amount_received'] ? false : true,
-                        'status' => OrderStatus::NEW
+                        'status' => OrderStatus::NEW,
                     ]
                 ));
 
@@ -77,10 +75,11 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'amount' => $amount,
                     'method' => $paymentMethod->name,
-                    'payment_method_id' => $paymentMethod->id
+                    'payment_method_id' => $paymentMethod->id,
                 ]);
 
                 $cart->clear();
+
                 return back();
             }
         );
@@ -90,18 +89,65 @@ class OrderController extends Controller
     {
         $order = $this->orderRepository->findFirst('id', $id);
 
-        // Ensure the order belongs to the current user's company
         if ($order->company_id !== current_user()->company_id) {
             abort(403, 'Unauthorized');
         }
 
         $order->load(['customer', 'payment_method', 'products']);
 
+        $paymentMethods = PaymentMethod::all();
+
         return Inertia::render('orders/show', [
             'order' => $order,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
+    public function recover(RecoverOrderRequest $request, $id)
+    {
+        $order = $this->orderRepository->findFirst('id', $id);
+
+        if ($order->company_id !== current_user()->company_id) {
+            abort(403, 'Unauthorized');
+        }
+
+        return DB::transaction(function () use ($request, $order) {
+            $order->load('products');
+            $productIds = $request->input('product_ids', []);
+
+            if (empty($productIds)) {
+                $productIds = $order->products->pluck('id')->toArray();
+            }
+
+            foreach ($productIds as $productId) {
+                $order->products()->updateExistingPivot($productId, ['is_recovered' => true]);
+            }
+
+            $allRecovered = ! $order->products()->wherePivot('is_recovered', false)->exists();
+
+            if ($allRecovered) {
+                $order->update(['status' => OrderStatus::TERMINATED]);
+            }
+
+            if ($request->filled('amount_paid') && $request->float('amount_paid') > 0) {
+                $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
+                Bank::create([
+                    'order_id' => $order->id,
+                    'amount' => $request->float('amount_paid'),
+                    'method' => $paymentMethod->name,
+                    'payment_method_id' => $paymentMethod->id,
+                ]);
+
+                $newAmountReceived = $order->amount_received + $request->float('amount_paid');
+                $order->update([
+                    'amount_received' => $newAmountReceived,
+                    'payment_status' => $newAmountReceived >= $order->amount,
+                ]);
+            }
+
+            return back();
+        });
+    }
 
     public function changeStatus($id)
     {

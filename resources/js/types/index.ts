@@ -55,6 +55,12 @@ export interface Company {
     [key: string]: unknown;
 }
 
+export interface OrderProductPivot {
+    quantity: number;
+    unit_price: number;
+    is_recovered: boolean;
+}
+
 export interface Product {
     id: number;
     name: string;
@@ -66,8 +72,7 @@ export interface Product {
     image_url?: string;
     user: User;
     active: boolean;
-    quantity?: number; // From pivot table when in an order
-    unit_price?: number; // From pivot table when in an order
+    pivot?: OrderProductPivot;
     [key: string]: unknown; // This allows for additional properties...
 }
 

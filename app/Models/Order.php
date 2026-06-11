@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Models\Traits\HasUniqueCode;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
 {
@@ -24,12 +24,10 @@ class Order extends Model
         });
     }
 
-
-
     public function products()
     {
         return $this->belongsToMany(Product::class, 'order_product')
-            ->withPivot(['quantity', 'unit_price'])
+            ->withPivot(['quantity', 'unit_price', 'is_recovered'])
             ->withTimestamps();
     }
 
