@@ -66,6 +66,8 @@ export interface Product {
     name: string;
     description: string;
     price: number;
+    category_id?: number;
+    category?: Category;
     created_at: string;
     updated_at: string;
     image?: string;
@@ -122,6 +124,8 @@ export interface Category {
     id: number;
     name: string;
     description?: string;
+    is_shop: boolean;
+    image?: string;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...

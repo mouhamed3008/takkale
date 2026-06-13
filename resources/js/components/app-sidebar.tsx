@@ -6,8 +6,9 @@ import pos from '@/routes/pos';
 import products from '@/routes/products';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BarChart2, CreditCard, LayoutGrid, Moon, Package, ShoppingBag, Star, Sun, Users, Wallet } from 'lucide-react';
+import { BarChart2, CreditCard, LayoutGrid, Moon, Package, ShoppingBag, Star, Sun, Tags, Users, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
+import categories from '@/routes/categories';
 import customers from '@/routes/customers';
 
 const mainNavItems: NavItem[] = [
@@ -20,6 +21,11 @@ const mainNavItems: NavItem[] = [
         title: 'Commandes',
         href: orders.index.url(),
         icon: ShoppingBag,
+    },
+    {
+        title: 'Catégories',
+        href: categories.index.url(),
+        icon: Tags,
     },
     {
         title: 'Produits',

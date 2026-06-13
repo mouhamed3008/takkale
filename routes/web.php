@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Cart\CartController;
+use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Order\OrderController;
@@ -18,6 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('products', ProductController::class);
+    Route::resource('categories', CategoryController::class);
     Route::resource('users', UserController::class);
     Route::resource('orders', OrderController::class);
     Route::patch('orders/{id}/change-status', [OrderController::class, 'changeStatus'])->name('orders.change-status');

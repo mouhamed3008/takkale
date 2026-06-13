@@ -1,30 +1,30 @@
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/hooks/use-confirm';
-import products from '@/routes/products';
-import { Product } from '@/types';
+import categoriesRoutes from '@/routes/categories';
+import { Category } from '@/types';
 import { router } from '@inertiajs/react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface ProductActionsProps {
-    product: Product;
-    onEdit: (product: Product) => void;
+interface CategoryActionsProps {
+    category: Category;
+    onEdit: (category: Category) => void;
 }
 
-export function ProductActions({ product, onEdit }: ProductActionsProps) {
+export function CategoryActions({ category, onEdit }: CategoryActionsProps) {
     const confirm = useConfirm();
 
     const handleDelete = async () => {
         await confirm.confirm({
-            title: 'Supprimer ce produit ?',
-            description: 'Cette action est irréversible et le produit sera perdu définitivement.',
+            title: 'Supprimer cette catégorie ?',
+            description: 'Cette action est irréversible. Les produits liés seront également affectés.',
             variant: 'destructive',
             cancelText: 'Annuler',
             confirmText: 'Supprimer',
             onConfirm: async () => {
-                router.delete(products.destroy.url(product.id), {
-                    onSuccess: () => toast.success('Produit supprimé'),
-                    onError: () => toast.error('Erreur suppression'),
+                router.delete(categoriesRoutes.destroy.url(category.id), {
+                    onSuccess: () => toast.success('Catégorie supprimée'),
+                    onError: () => toast.error('Erreur lors de la suppression'),
                 });
             },
         });
@@ -35,7 +35,7 @@ export function ProductActions({ product, onEdit }: ProductActionsProps) {
             <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onEdit(product)}
+                onClick={() => onEdit(category)}
                 className="rounded-full bg-blue-50 text-blue-500 hover:bg-blue-100"
             >
                 <Pencil className="h-4 w-4" />

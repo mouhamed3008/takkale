@@ -12,7 +12,11 @@ const getProductStatusStyles = (active: boolean) => {
     return 'border-rose-100 bg-rose-50 text-rose-600';
 };
 
-export const columns: ColumnDef<Product>[] = [
+interface CreateColumnsOptions {
+    onEdit: (product: Product) => void;
+}
+
+export const createColumns = ({ onEdit }: CreateColumnsOptions): ColumnDef<Product>[] => [
     {
         id: 'select',
         header: () => <Checkbox aria-label="Select all products" className="border-slate-300" />,
@@ -84,6 +88,6 @@ export const columns: ColumnDef<Product>[] = [
     {
         id: 'actions',
         header: 'Action',
-        cell: ({ row }) => <ProductActions product={row.original} />,
+        cell: ({ row }) => <ProductActions product={row.original} onEdit={onEdit} />,
     },
 ];

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Product;
 
-use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Repositories\CategoryRepository;
 use App\Repositories\ProductRepository;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
@@ -13,29 +14,42 @@ class ProductController extends Controller
 
     protected $productRepository;
 
+    protected $categoryRepository;
+
     public function __construct(
         ProductRepository $productRepository,
+        CategoryRepository $categoryRepository,
     ) {
         $this->productRepository = $productRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     public function index()
     {
         $this->authorize('list_product');
 
+        $companyId = current_user()->company_id;
+
         $products = $this->productRepository->allQuery()
-            ->where(['company_id' => current_user()->company_id])
+            ->where(['company_id' => $companyId])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        $categories = $this->categoryRepository->allQuery()
+            ->where('company_id', $companyId)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('products/index', [
             'products' => $products,
+            'categories' => $categories,
         ]);
     }
 
     public function create()
     {
         $this->authorize('create_product');
+
         return Inertia::render('products/create', []);
     }
 
@@ -51,7 +65,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['error' => 'Une erreur est survenue lors de la création du produit: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Une erreur est survenue lors de la création du produit: '.$e->getMessage()]);
         }
     }
 
@@ -59,6 +73,7 @@ class ProductController extends Controller
     {
         $this->authorize('read_product');
         $product = $this->productRepository->find($id);
+
         return Inertia::render('products/show', [
             'product' => $product,
         ]);
@@ -68,6 +83,7 @@ class ProductController extends Controller
     {
         $this->authorize('update_product');
         $product = $this->productRepository->find($id);
+
         return Inertia::render('products/edit', [
             'product' => $product,
         ]);
@@ -85,7 +101,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['error' => 'Une erreur est survenue lors de la mise à jour du produit: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Une erreur est survenue lors de la mise à jour du produit: '.$e->getMessage()]);
         }
     }
 
@@ -100,7 +116,7 @@ class ProductController extends Controller
                 ->with('success', 'Produit supprimé avec succès');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors(['error' => 'Une erreur est survenue lors de la suppression du produit: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Une erreur est survenue lors de la suppression du produit: '.$e->getMessage()]);
         }
     }
 }
