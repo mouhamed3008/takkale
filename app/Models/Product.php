@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\UploadProductImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 
 class Product extends Model
 {
@@ -13,11 +16,11 @@ class Product extends Model
     use HasFactory;
     use UploadProductImage;
 
-    protected $with = ['user', "company"];
+    protected $with = ['user', 'company', 'category'];
 
     protected $appends = ['image_url'];
 
-    protected $fillable = ['name', 'price', 'description', 'image', 'user_id', 'company_id'];
+    protected $fillable = ['name', 'price', 'description', 'image', 'user_id', 'company_id', 'category_id'];
 
     public const ABILITIES_LIST = [
         'Products' => [
@@ -26,7 +29,7 @@ class Product extends Model
             ['name' => 'read_product', 'label' => 'Voir les informations du compte', 'key' => 'PRODUCT'],
             ['name' => 'update_product', 'label' => 'Modifier les informations du compte utilisateur', 'key' => 'PRODUCT'],
 
-        ]
+        ],
     ];
 
     protected static function booted()
@@ -44,14 +47,19 @@ class Product extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function setImageAttribute($file)
     {
-        if ($file instanceof \Illuminate\Http\UploadedFile) {
+        if ($file instanceof UploadedFile) {
             $this->attributes['image'] = $this->storeImage($file);
         } else {
             $this->attributes['image'] = $file;
@@ -60,10 +68,10 @@ class Product extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return $this->image ? asset('storage/'.$this->image) : null;
     }
 
-    public function orders()
+    public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'order_product')
             ->withPivot(['quantity', 'unit_price'])
